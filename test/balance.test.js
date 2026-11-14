@@ -50,6 +50,8 @@ test('the advice: water, time from the rate, cancelled by the forecast rain', ()
   assert.deepEqual(advise(-12.4, lawn, wet), { water: 0, duration: 0, skipped: true });
   assert.equal(advise(-12.4, lawn, { rainToday: 6.2, rainThreshold: 0 }).skipped, false);
   assert.equal(advise(-12.4, lawn, { rainToday: null, rainThreshold: 5 }).skipped, false);
+  assert.equal(advise(-2.1, { rate: 3 }, dry).duration, 42, 'no float noise');
+  assert.equal(advise(-30, { rate: 0.5 }, dry).duration, 1440, 'a day at most');
 });
 
 test('local days follow the Gladys time zone and the calendar', () => {
@@ -95,6 +97,8 @@ test('the configuration reads decimals with a comma and derives the rate', () =>
   );
   assert.deepEqual(config.invalid, [4]);
   assert.equal(config.rainThreshold, 2.5);
+  assert.equal(normalizeConfig({ rain_threshold: 'abc' }).rainThreshold, 5);
+  assert.equal(normalizeConfig({ rain_threshold: '0' }).rainThreshold, 0);
   assert.equal(config.calcHour, 5);
   assert.equal(config.language, 'fr');
 });

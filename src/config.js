@@ -109,8 +109,8 @@ export function normalizeConfig(raw = {}) {
   const threshold = parseDecimal(merged.rain_threshold);
   return {
     language: LANGUAGES.includes(merged.language) ? merged.language : DEFAULT_CONFIG.language,
-    // 0 or unreadable: the forecast rain never cancels the watering.
-    rainThreshold: Number.isFinite(threshold) ? threshold : 0,
+    // 0: the forecast rain never cancels the watering; unreadable: the default.
+    rainThreshold: Number.isFinite(threshold) ? threshold : Number(DEFAULT_CONFIG.rain_threshold),
     calcHour: clampInteger(merged.calc_hour, DEFAULT_CONFIG.calc_hour, 0, 23),
     zones,
     invalid,

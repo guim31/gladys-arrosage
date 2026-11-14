@@ -11,7 +11,7 @@ import {
   DEVICE_FEATURE_UNITS as U,
 } from '@gladysassistant/integration-sdk';
 import { NAMES, pick } from './i18n.js';
-import { FLOOR, round1 } from './balance.js';
+import { FLOOR, MAX_DURATION, round1 } from './balance.js';
 
 export const DEVICE_TYPE = 'zone';
 
@@ -47,7 +47,7 @@ export function buildDevice(gladys, zone, language) {
       feature(ids, 'duration', n.duration, C.DURATION, T.DURATION.INTEGER, {
         unit: U.MINUTES,
         min: 0,
-        max: 1440,
+        max: MAX_DURATION,
       }),
       // Signed: symmetric bounds, so that a gauge puts 0 in the middle.
       feature(ids, 'balance', n.balance, ...depth, { unit: U.MM, min: -FLOOR, max: FLOOR }),

@@ -90,6 +90,30 @@ test('a downtime longer than the history skips the unknown days, with one warnin
   assert.match(warnings[0].message, /from 2026-10-02 to 2026-11-06/);
 });
 
+test('a typo in a zone keeps its balance until fixed', async () => {
+  const dataDir = await savedState({ balances: { 1: -7 }, lastDay: '2026-11-13' });
+  const { gladys, app } = await createWorld({ dataDir });
+  await gladys.fake.configUpdated({ zone_1_name: 'Pelouse', zone_1_area: '12a' });
+  assert.equal(app.store.balances[1], -7);
+  assert.equal(gladys.fake.connectionStatus.connected, false);
+  await gladys.fake.configUpdated({ zone_1_name: 'Pelouse', zone_1_rate: '10' });
+  assert.equal(lastState(gladys, 1, 'balance'), -7);
+  assert.deepEqual(gladys.fake.connectionStatus, { connected: true });
+});
+
+test('a day missing from the series is skipped once the trigger window is over', async () => {
+  const body = await fixture('open-meteo-toulouse');
+  const index = body.daily.time.indexOf('2026-11-13');
+  body.daily.et0_fao_evapotranspiration[index] = null;
+  const dataDir = await savedState({ balances: { 1: -1 }, lastDay: '2026-11-11' });
+  const { app, advance, logger } = await createWorld({ dataDir, response: body });
+  await advance(60); // 05:00: 12/11 counted, 13/11 awaited
+  assert.equal(app.store.lastDay, '2026-11-12');
+  await advance(120); // 07:00
+  assert.equal(app.store.lastDay, '2026-11-13');
+  assert.ok(logger.lines.some((l) => /No weather data for 2026-11-13/.test(l.message)));
+});
+
 test('the next day is counted the next morning from a fresh reading', async () => {
   const { gladys, app, api, advance } = await createWorld();
   await advance(24 * 60); // 15/11, 04:00

@@ -126,12 +126,13 @@ export function createApp(
     if (key === lastStatus) {
       return;
     }
-    lastStatus = key;
     if (message) {
       await gladys.setConnectionStatus(false, message);
     } else {
       await gladys.setConnectionStatus(true);
     }
+    // Only once sent: a failed call is tried again on the next cycle.
+    lastStatus = key;
   }
 
   async function refreshForecast(date, day) {
@@ -170,7 +171,20 @@ export function createApp(
       next = known[0];
     }
     let changed = false;
-    while (next <= yesterday && forecast.days[next]) {
+    // A day the model has no value for is skipped once a later day is known,
+    // or, for yesterday, once the trigger window is over.
+    const late = hour - config.calcHour >= FIRE_WINDOW_HOURS;
+    while (next <= yesterday) {
+      if (!forecast.days[next]) {
+        if (next === yesterday ? !late : !known.some((d) => d > next)) {
+          break;
+        }
+        logger.warn(`No weather data for ${next}: day skipped`);
+        state.lastDay = next;
+        next = addDays(next, 1);
+        changed = true;
+        continue;
+      }
       for (const zone of config.zones) {
         const balance = state.balances[zone.slot] ?? 0;
         state.balances[zone.slot] = applyDay(balance, forecast.days[next], zone);
@@ -250,7 +264,9 @@ export function createApp(
     const state = store.state;
     if (state.lastDay === yesterday && state.adviceDay !== day && hour >= config.calcHour) {
       state.adviceDay = day;
-      dirty = true;
+      // Saved before firing: a crash in between never fires the day twice.
+      await store.save();
+      dirty = false;
       if (hour - config.calcHour < FIRE_WINDOW_HOURS) {
         await fireAdvice(zones);
       }
@@ -353,10 +369,13 @@ export function createApp(
 
   gladys.onConfigUpdated(async (raw) => {
     logger.info('Configuration updated');
-    config = normalizeConfig(raw);
     await serialize(async () => {
-      // A slot emptied forgets its balance: a new zone there starts afresh.
-      const slots = new Set(config.zones.map((zone) => String(zone.slot)));
+      config = normalizeConfig(raw);
+      // A slot emptied forgets its balance: a new zone there starts afresh. A
+      // slot with a typo keeps it until fixed.
+      const slots = new Set(
+        [...config.zones.map((zone) => zone.slot), ...config.invalid].map(String),
+      );
       for (const slot of Object.keys(store.state.balances)) {
         if (!slots.has(slot)) {
           delete store.state.balances[slot];
@@ -436,8 +455,12 @@ export function createApp(
   });
 
   gladys.on('connected', async () => {
-    config = normalizeConfig(await gladys.getConfig());
-    await store.load();
+    const raw = await gladys.getConfig();
+    await serialize(async () => {
+      config = normalizeConfig(raw);
+      await store.load();
+    });
+    lastStatus = null; // a reconnection resends the status
     await publishDevices();
     await tick();
     startLoop();

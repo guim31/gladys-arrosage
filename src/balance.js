@@ -10,6 +10,7 @@
 // -----------------------------------------------------------------------------
 
 export const FLOOR = 500;
+export const MAX_DURATION = 1440;
 
 export const round1 = (value) => Math.round(value * 10) / 10;
 
@@ -41,7 +42,10 @@ export function advise(balance, zone, { rainToday, rainThreshold }) {
   const skipped =
     deficit > 0 && rainThreshold > 0 && rainToday !== null && rainToday >= rainThreshold;
   const water = skipped ? 0 : deficit;
-  const duration = zone.rate ? Math.ceil((water / zone.rate) * 60) : null;
+  // The epsilon absorbs float noise (2.1 / 3 × 60 = 42.000…01); a day at most.
+  const duration = zone.rate
+    ? Math.min(MAX_DURATION, Math.max(0, Math.ceil((water / zone.rate) * 60 - 1e-9)))
+    : null;
   return { water, duration, skipped };
 }
 
