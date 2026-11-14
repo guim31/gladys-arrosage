@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-14
+
 ### Added
 
 - One device per garden zone (up to four): water to bring (mm), advised
@@ -24,3 +26,6 @@ the notes of the version's GitHub Release.
   scene action "Zone watered" to count a watering.
 - Dashboard widget "Irrigation advice" with a "watered" button per zone.
 - Texts and documentation in English, French, German and Spanish.
+
+[Unreleased]: https://github.com/guim31/gladys-arrosage/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-arrosage/releases/tag/v1.0.0
