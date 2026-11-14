@@ -75,6 +75,7 @@ export function createApp(
   const statesLog = failureLog('Publishing the states');
   const eventsLog = failureLog('Firing the watering trigger');
   const computeLog = failureLog('Computing the advice');
+  const statusLog = failureLog('Reporting the status');
 
   async function loadLocation() {
     lastLocationAttempt = now().getTime();
@@ -126,13 +127,19 @@ export function createApp(
     if (key === lastStatus) {
       return;
     }
-    if (message) {
-      await gladys.setConnectionStatus(false, message);
-    } else {
-      await gladys.setConnectionStatus(true);
+    try {
+      if (message) {
+        await gladys.setConnectionStatus(false, message);
+      } else {
+        await gladys.setConnectionStatus(true);
+      }
+      // Only once sent: a failed call is tried again on the next cycle,
+      // without holding back the computation.
+      lastStatus = key;
+      statusLog.ok();
+    } catch (err) {
+      statusLog.fail(err);
     }
-    // Only once sent: a failed call is tried again on the next cycle.
-    lastStatus = key;
   }
 
   async function refreshForecast(date, day) {

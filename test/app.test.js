@@ -238,6 +238,26 @@ test('Open-Meteo down: one warning, a status message, recovery after 15 minutes'
   assert.ok(logger.lines.some((l) => l.level === 'info' && /works again/.test(l.message)));
 });
 
+test('a status Gladys refuses does not hold back the advice, and is sent again', async () => {
+  const { gladys, api, advance, logger } = await createWorld();
+  const original = gladys.setConnectionStatus.bind(gladys);
+  let refuse = true;
+  gladys.setConnectionStatus = async (...args) => {
+    if (refuse) {
+      throw new Error('HTTP 400');
+    }
+    return original(...args);
+  };
+  api.fail = 'ENOTFOUND';
+  await advance(3 * 60);
+  await advance(60); // 07:00, the computation went on
+  assert.equal(lastState(gladys, 1, 'water'), 0.6);
+  assert.equal(logger.lines.filter((l) => /Reporting the status/.test(l.message)).length, 1);
+  refuse = false;
+  await advance(5);
+  assert.deepEqual(gladys.fake.connectionStatus.message, STATUS.apiError);
+});
+
 test('no located house: a status message, no request to Open-Meteo', async () => {
   const { gladys, api } = await createWorld({ houses: [] });
   assert.deepEqual(gladys.fake.connectionStatus, {
