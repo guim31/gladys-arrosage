@@ -1,0 +1,28 @@
+{
+  "latitude": 43.608578,
+  "longitude": 1.4485656,
+  "utc_offset_seconds": 3600,
+  "timezone": "Europe/Paris",
+  "timezone_abbreviation": "GMT+1",
+  "elevation": 153,
+  "daily_units": {
+    "time": "iso8601",
+    "et0_fao_evapotranspiration": "mm",
+    "precipitation_sum": "mm"
+  },
+  "daily": {
+    "time": [
+      "2026-11-07",
+      "2026-11-08",
+      "2026-11-09",
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13",
+      "2026-11-14",
+      "2026-11-15"
+    ],
+    "et0_fao_evapotranspiration": [1.22, 1.51, 1.46, 1.59, 1.56, 0.78, 0.91, 1.06, 0.99],
+    "precipitation_sum": [0, 0, 0, 0, 0.1, 2.4, 0.2, 1.4, 1]
+  }
+}

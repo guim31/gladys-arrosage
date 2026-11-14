@@ -30,6 +30,15 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration stores and sends:
+
+- `/data/state.json` holds the water balance of every zone and the last days
+  computed. No secret, no account: the integration needs none.
+- It reads the coordinates of your house from Gladys (`location` permission)
+  and sends them, rounded to four decimals, to the public Open-Meteo API
+  (`api.open-meteo.com`, HTTPS) every 3 hours. Nothing else leaves the
+  container.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+and the Open-Meteo service.

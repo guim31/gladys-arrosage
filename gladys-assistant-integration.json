@@ -1,177 +1,1031 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Arrosage conseillé",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Water to bring to each garden zone from evapotranspiration and rain (Open-Meteo).",
+    "fr": "Eau à apporter à chaque zone du jardin d'après l'évapotranspiration et la pluie (Open-Meteo).",
+    "de": "Wassermenge für jede Gartenzone aus Verdunstung und Regen (Open-Meteo).",
+    "es": "Agua a aportar a cada zona del jardín según la evapotranspiración y la lluvia (Open-Meteo)."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-arrosage:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-arrosage/main/cover.png",
+  "categories": ["environment"],
+  "transports": ["cloud"],
+  "location": true,
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "How it works",
+        "fr": "Fonctionnement",
+        "de": "So funktioniert es",
+        "es": "Funcionamiento"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Every day, the water balance of each zone adds the rain and subtracts the evapotranspiration (ET0 × crop coefficient), read from Open-Meteo at the location of your house in Gladys. One device per zone.",
+        "fr": "Chaque jour, le bilan hydrique de chaque zone ajoute la pluie et retire l'évapotranspiration (ET0 × coefficient cultural), lues sur Open-Meteo à la position de votre maison dans Gladys. Un appareil par zone.",
+        "de": "Jeden Tag addiert die Wasserbilanz jeder Zone den Regen und zieht die Verdunstung ab (ET0 × Pflanzenkoeffizient), gelesen bei Open-Meteo am Standort deines Hauses in Gladys. Ein Gerät pro Zone.",
+        "es": "Cada día, el balance hídrico de cada zona suma la lluvia y resta la evapotranspiración (ET0 × coeficiente de cultivo), leídas en Open-Meteo en la ubicación de su casa en Gladys. Un dispositivo por zona."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://open-meteo.com/en/terms",
+          "label": {
+            "en": "Open-Meteo terms of use",
+            "fr": "Conditions d'utilisation d'Open-Meteo",
+            "de": "Nutzungsbedingungen von Open-Meteo",
+            "es": "Condiciones de uso de Open-Meteo"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
+      "key": "language",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Language of names and texts",
+        "fr": "Langue des noms et des textes",
+        "de": "Sprache der Namen und Texte",
+        "es": "Idioma de los nombres y textos"
+      },
       "required": false,
-      "default": "celsius",
+      "default": "fr",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "rain_threshold",
+      "type": "string",
+      "label": {
+        "en": "Rain that cancels watering (mm)",
+        "fr": "Pluie qui annule l'arrosage (mm)",
+        "de": "Regen, der das Gießen absagt (mm)",
+        "es": "Lluvia que anula el riego (mm)"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "When the rain forecast for the day reaches this amount, the advice is no watering. 0 to disable. Decimals accepted (2,5).",
+        "fr": "Quand la pluie prévue dans la journée atteint cette quantité, le conseil est de ne pas arroser. 0 pour désactiver. Décimales acceptées (2,5).",
+        "de": "Erreicht der vorhergesagte Regen des Tages diese Menge, lautet die Empfehlung: nicht gießen. 0 zum Deaktivieren. Dezimalzahlen erlaubt (2,5).",
+        "es": "Cuando la lluvia prevista del día alcanza esta cantidad, el consejo es no regar. 0 para desactivar. Se aceptan decimales (2,5)."
+      },
+      "placeholder": {
+        "en": "e.g. 5",
+        "fr": "ex. 5",
+        "de": "z. B. 5",
+        "es": "p. ej. 5"
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "5"
+    },
+    {
+      "key": "calc_hour",
+      "type": "number",
+      "label": {
+        "en": "Hour of the daily computation",
+        "fr": "Heure du calcul quotidien",
+        "de": "Uhrzeit der täglichen Berechnung",
+        "es": "Hora del cálculo diario"
+      },
+      "description": {
+        "en": "At this hour (0-23), yesterday is added to the balances and the 'Watering advised' trigger fires. Choose it before your watering time.",
+        "fr": "À cette heure (0-23), la veille est ajoutée aux bilans et le déclencheur « Arrosage conseillé » part. Choisissez-la avant l'heure d'arrosage.",
+        "de": "Zu dieser Stunde (0-23) wird der Vortag zu den Bilanzen addiert und der Auslöser „Bewässerung empfohlen“ startet. Wähle sie vor deiner Gießzeit.",
+        "es": "A esta hora (0-23) se suma el día anterior a los balances y se activa el disparador «Riego aconsejado». Elíjala antes de la hora de riego."
+      },
+      "required": false,
+      "default": 5,
+      "min": 0,
+      "max": 23
+    },
+    {
+      "key": "zone_1",
+      "type": "section",
+      "label": {
+        "en": "Zone 1",
+        "fr": "Zone 1",
+        "de": "Zone 1",
+        "es": "Zona 1"
+      },
+      "description": {
+        "en": "A zone exists once it has a name. The rate, or the flow and the area, give the advised watering time.",
+        "fr": "Une zone existe dès qu'elle a un nom. Le débit en mm/h, ou le débit en L/min et la surface, donnent la durée d'arrosage conseillée.",
+        "de": "Eine Zone existiert, sobald sie einen Namen hat. Die Rate in mm/h oder der Durchfluss in L/min mit der Fläche ergeben die empfohlene Dauer.",
+        "es": "Una zona existe en cuanto tiene un nombre. La tasa en mm/h, o el caudal en L/min y la superficie, dan la duración de riego aconsejada."
+      }
+    },
+    {
+      "key": "zone_1_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "placeholder": {
+        "en": "e.g. Lawn",
+        "fr": "ex. Pelouse",
+        "de": "z. B. Rasen",
+        "es": "p. ej. Césped"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_1_crop",
+      "type": "select",
+      "label": {
+        "en": "Type of planting",
+        "fr": "Type de plantation",
+        "de": "Art der Bepflanzung",
+        "es": "Tipo de plantación"
+      },
+      "required": false,
+      "default": "lawn",
+      "options": [
+        {
+          "value": "lawn",
+          "label": {
+            "en": "Lawn (Kc 0.85)",
+            "fr": "Gazon (Kc 0,85)",
+            "de": "Rasen (Kc 0,85)",
+            "es": "Césped (Kc 0,85)"
+          }
+        },
+        {
+          "value": "vegetables",
+          "label": {
+            "en": "Vegetable garden (Kc 1)",
+            "fr": "Potager (Kc 1)",
+            "de": "Gemüsegarten (Kc 1)",
+            "es": "Huerto (Kc 1)"
+          }
+        },
+        {
+          "value": "flowers",
+          "label": {
+            "en": "Flower beds (Kc 0.75)",
+            "fr": "Massifs fleuris (Kc 0,75)",
+            "de": "Blumenbeete (Kc 0,75)",
+            "es": "Macizos de flores (Kc 0,75)"
+          }
+        },
+        {
+          "value": "shrubs",
+          "label": {
+            "en": "Hedges and shrubs (Kc 0.5)",
+            "fr": "Haies et arbustes (Kc 0,5)",
+            "de": "Hecken und Sträucher (Kc 0,5)",
+            "es": "Setos y arbustos (Kc 0,5)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "zone_1_kc",
+      "type": "string",
+      "label": {
+        "en": "Crop coefficient Kc (optional)",
+        "fr": "Coefficient cultural Kc (facultatif)",
+        "de": "Pflanzenkoeffizient Kc (optional)",
+        "es": "Coeficiente de cultivo Kc (opcional)"
+      },
+      "description": {
+        "en": "Replaces the coefficient of the type, from 0 to 2.",
+        "fr": "Remplace le coefficient du type, de 0 à 2.",
+        "de": "Ersetzt den Koeffizienten der Art, von 0 bis 2.",
+        "es": "Sustituye el coeficiente del tipo, de 0 a 2."
+      },
+      "placeholder": {
+        "en": "e.g. 0.7",
+        "fr": "ex. 0,7",
+        "de": "z. B. 0,7",
+        "es": "p. ej. 0,7"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_1_rate",
+      "type": "string",
+      "label": {
+        "en": "Application rate (mm/h)",
+        "fr": "Débit d'arrosage (mm/h)",
+        "de": "Beregnungsrate (mm/h)",
+        "es": "Tasa de riego (mm/h)"
+      },
+      "description": {
+        "en": "Water depth the sprinkler or drip line brings in one hour. Takes precedence over flow and area.",
+        "fr": "Hauteur d'eau apportée en une heure par l'arroseur ou le goutte-à-goutte. Prioritaire sur le débit et la surface.",
+        "de": "Wasserhöhe, die Regner oder Tropfschlauch in einer Stunde bringt. Hat Vorrang vor Durchfluss und Fläche.",
+        "es": "Altura de agua que aporta el aspersor o el goteo en una hora. Tiene prioridad sobre el caudal y la superficie."
+      },
+      "placeholder": {
+        "en": "e.g. 10",
+        "fr": "ex. 10",
+        "de": "z. B. 10",
+        "es": "p. ej. 10"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_1_flow",
+      "type": "string",
+      "label": {
+        "en": "Flow (L/min)",
+        "fr": "Débit (L/min)",
+        "de": "Durchfluss (L/min)",
+        "es": "Caudal (L/min)"
+      },
+      "placeholder": {
+        "en": "e.g. 12",
+        "fr": "ex. 12",
+        "de": "z. B. 12",
+        "es": "p. ej. 12"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_1_area",
+      "type": "string",
+      "label": {
+        "en": "Watered area (m²)",
+        "fr": "Surface arrosée (m²)",
+        "de": "Bewässerte Fläche (m²)",
+        "es": "Superficie regada (m²)"
+      },
+      "placeholder": {
+        "en": "e.g. 80",
+        "fr": "ex. 80",
+        "de": "z. B. 80",
+        "es": "p. ej. 80"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_1_reserve",
+      "type": "number",
+      "label": {
+        "en": "Soil reserve cap (mm)",
+        "fr": "Plafond de réserve du sol (mm)",
+        "de": "Obergrenze der Bodenreserve (mm)",
+        "es": "Límite de reserva del suelo (mm)"
+      },
+      "description": {
+        "en": "Surplus water the soil keeps after heavy rain, counted against the next days. 0: no carry-over.",
+        "fr": "Excédent d'eau que le sol garde après une forte pluie, déduit des jours suivants. 0 : aucun report.",
+        "de": "Überschüssiges Wasser, das der Boden nach starkem Regen speichert, für die nächsten Tage angerechnet. 0: kein Übertrag.",
+        "es": "Excedente de agua que el suelo guarda tras una lluvia fuerte, descontado de los días siguientes. 0: sin arrastre."
+      },
+      "required": false,
+      "default": 25,
+      "min": 0,
+      "max": 200
+    },
+    {
+      "key": "zone_2",
+      "type": "section",
+      "label": {
+        "en": "Zone 2",
+        "fr": "Zone 2",
+        "de": "Zone 2",
+        "es": "Zona 2"
+      }
+    },
+    {
+      "key": "zone_2_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "placeholder": {
+        "en": "e.g. Lawn",
+        "fr": "ex. Pelouse",
+        "de": "z. B. Rasen",
+        "es": "p. ej. Césped"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_2_crop",
+      "type": "select",
+      "label": {
+        "en": "Type of planting",
+        "fr": "Type de plantation",
+        "de": "Art der Bepflanzung",
+        "es": "Tipo de plantación"
+      },
+      "required": false,
+      "default": "lawn",
+      "options": [
+        {
+          "value": "lawn",
+          "label": {
+            "en": "Lawn (Kc 0.85)",
+            "fr": "Gazon (Kc 0,85)",
+            "de": "Rasen (Kc 0,85)",
+            "es": "Césped (Kc 0,85)"
+          }
+        },
+        {
+          "value": "vegetables",
+          "label": {
+            "en": "Vegetable garden (Kc 1)",
+            "fr": "Potager (Kc 1)",
+            "de": "Gemüsegarten (Kc 1)",
+            "es": "Huerto (Kc 1)"
+          }
+        },
+        {
+          "value": "flowers",
+          "label": {
+            "en": "Flower beds (Kc 0.75)",
+            "fr": "Massifs fleuris (Kc 0,75)",
+            "de": "Blumenbeete (Kc 0,75)",
+            "es": "Macizos de flores (Kc 0,75)"
+          }
+        },
+        {
+          "value": "shrubs",
+          "label": {
+            "en": "Hedges and shrubs (Kc 0.5)",
+            "fr": "Haies et arbustes (Kc 0,5)",
+            "de": "Hecken und Sträucher (Kc 0,5)",
+            "es": "Setos y arbustos (Kc 0,5)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "zone_2_kc",
+      "type": "string",
+      "label": {
+        "en": "Crop coefficient Kc (optional)",
+        "fr": "Coefficient cultural Kc (facultatif)",
+        "de": "Pflanzenkoeffizient Kc (optional)",
+        "es": "Coeficiente de cultivo Kc (opcional)"
+      },
+      "description": {
+        "en": "Replaces the coefficient of the type, from 0 to 2.",
+        "fr": "Remplace le coefficient du type, de 0 à 2.",
+        "de": "Ersetzt den Koeffizienten der Art, von 0 bis 2.",
+        "es": "Sustituye el coeficiente del tipo, de 0 a 2."
+      },
+      "placeholder": {
+        "en": "e.g. 0.7",
+        "fr": "ex. 0,7",
+        "de": "z. B. 0,7",
+        "es": "p. ej. 0,7"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_2_rate",
+      "type": "string",
+      "label": {
+        "en": "Application rate (mm/h)",
+        "fr": "Débit d'arrosage (mm/h)",
+        "de": "Beregnungsrate (mm/h)",
+        "es": "Tasa de riego (mm/h)"
+      },
+      "description": {
+        "en": "Water depth the sprinkler or drip line brings in one hour. Takes precedence over flow and area.",
+        "fr": "Hauteur d'eau apportée en une heure par l'arroseur ou le goutte-à-goutte. Prioritaire sur le débit et la surface.",
+        "de": "Wasserhöhe, die Regner oder Tropfschlauch in einer Stunde bringt. Hat Vorrang vor Durchfluss und Fläche.",
+        "es": "Altura de agua que aporta el aspersor o el goteo en una hora. Tiene prioridad sobre el caudal y la superficie."
+      },
+      "placeholder": {
+        "en": "e.g. 10",
+        "fr": "ex. 10",
+        "de": "z. B. 10",
+        "es": "p. ej. 10"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_2_flow",
+      "type": "string",
+      "label": {
+        "en": "Flow (L/min)",
+        "fr": "Débit (L/min)",
+        "de": "Durchfluss (L/min)",
+        "es": "Caudal (L/min)"
+      },
+      "placeholder": {
+        "en": "e.g. 12",
+        "fr": "ex. 12",
+        "de": "z. B. 12",
+        "es": "p. ej. 12"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_2_area",
+      "type": "string",
+      "label": {
+        "en": "Watered area (m²)",
+        "fr": "Surface arrosée (m²)",
+        "de": "Bewässerte Fläche (m²)",
+        "es": "Superficie regada (m²)"
+      },
+      "placeholder": {
+        "en": "e.g. 80",
+        "fr": "ex. 80",
+        "de": "z. B. 80",
+        "es": "p. ej. 80"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_2_reserve",
+      "type": "number",
+      "label": {
+        "en": "Soil reserve cap (mm)",
+        "fr": "Plafond de réserve du sol (mm)",
+        "de": "Obergrenze der Bodenreserve (mm)",
+        "es": "Límite de reserva del suelo (mm)"
+      },
+      "description": {
+        "en": "Surplus water the soil keeps after heavy rain, counted against the next days. 0: no carry-over.",
+        "fr": "Excédent d'eau que le sol garde après une forte pluie, déduit des jours suivants. 0 : aucun report.",
+        "de": "Überschüssiges Wasser, das der Boden nach starkem Regen speichert, für die nächsten Tage angerechnet. 0: kein Übertrag.",
+        "es": "Excedente de agua que el suelo guarda tras una lluvia fuerte, descontado de los días siguientes. 0: sin arrastre."
+      },
+      "required": false,
+      "default": 25,
+      "min": 0,
+      "max": 200
+    },
+    {
+      "key": "zone_3",
+      "type": "section",
+      "label": {
+        "en": "Zone 3",
+        "fr": "Zone 3",
+        "de": "Zone 3",
+        "es": "Zona 3"
+      }
+    },
+    {
+      "key": "zone_3_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "placeholder": {
+        "en": "e.g. Lawn",
+        "fr": "ex. Pelouse",
+        "de": "z. B. Rasen",
+        "es": "p. ej. Césped"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_3_crop",
+      "type": "select",
+      "label": {
+        "en": "Type of planting",
+        "fr": "Type de plantation",
+        "de": "Art der Bepflanzung",
+        "es": "Tipo de plantación"
+      },
+      "required": false,
+      "default": "lawn",
+      "options": [
+        {
+          "value": "lawn",
+          "label": {
+            "en": "Lawn (Kc 0.85)",
+            "fr": "Gazon (Kc 0,85)",
+            "de": "Rasen (Kc 0,85)",
+            "es": "Césped (Kc 0,85)"
+          }
+        },
+        {
+          "value": "vegetables",
+          "label": {
+            "en": "Vegetable garden (Kc 1)",
+            "fr": "Potager (Kc 1)",
+            "de": "Gemüsegarten (Kc 1)",
+            "es": "Huerto (Kc 1)"
+          }
+        },
+        {
+          "value": "flowers",
+          "label": {
+            "en": "Flower beds (Kc 0.75)",
+            "fr": "Massifs fleuris (Kc 0,75)",
+            "de": "Blumenbeete (Kc 0,75)",
+            "es": "Macizos de flores (Kc 0,75)"
+          }
+        },
+        {
+          "value": "shrubs",
+          "label": {
+            "en": "Hedges and shrubs (Kc 0.5)",
+            "fr": "Haies et arbustes (Kc 0,5)",
+            "de": "Hecken und Sträucher (Kc 0,5)",
+            "es": "Setos y arbustos (Kc 0,5)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "zone_3_kc",
+      "type": "string",
+      "label": {
+        "en": "Crop coefficient Kc (optional)",
+        "fr": "Coefficient cultural Kc (facultatif)",
+        "de": "Pflanzenkoeffizient Kc (optional)",
+        "es": "Coeficiente de cultivo Kc (opcional)"
+      },
+      "description": {
+        "en": "Replaces the coefficient of the type, from 0 to 2.",
+        "fr": "Remplace le coefficient du type, de 0 à 2.",
+        "de": "Ersetzt den Koeffizienten der Art, von 0 bis 2.",
+        "es": "Sustituye el coeficiente del tipo, de 0 a 2."
+      },
+      "placeholder": {
+        "en": "e.g. 0.7",
+        "fr": "ex. 0,7",
+        "de": "z. B. 0,7",
+        "es": "p. ej. 0,7"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_3_rate",
+      "type": "string",
+      "label": {
+        "en": "Application rate (mm/h)",
+        "fr": "Débit d'arrosage (mm/h)",
+        "de": "Beregnungsrate (mm/h)",
+        "es": "Tasa de riego (mm/h)"
+      },
+      "description": {
+        "en": "Water depth the sprinkler or drip line brings in one hour. Takes precedence over flow and area.",
+        "fr": "Hauteur d'eau apportée en une heure par l'arroseur ou le goutte-à-goutte. Prioritaire sur le débit et la surface.",
+        "de": "Wasserhöhe, die Regner oder Tropfschlauch in einer Stunde bringt. Hat Vorrang vor Durchfluss und Fläche.",
+        "es": "Altura de agua que aporta el aspersor o el goteo en una hora. Tiene prioridad sobre el caudal y la superficie."
+      },
+      "placeholder": {
+        "en": "e.g. 10",
+        "fr": "ex. 10",
+        "de": "z. B. 10",
+        "es": "p. ej. 10"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_3_flow",
+      "type": "string",
+      "label": {
+        "en": "Flow (L/min)",
+        "fr": "Débit (L/min)",
+        "de": "Durchfluss (L/min)",
+        "es": "Caudal (L/min)"
+      },
+      "placeholder": {
+        "en": "e.g. 12",
+        "fr": "ex. 12",
+        "de": "z. B. 12",
+        "es": "p. ej. 12"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_3_area",
+      "type": "string",
+      "label": {
+        "en": "Watered area (m²)",
+        "fr": "Surface arrosée (m²)",
+        "de": "Bewässerte Fläche (m²)",
+        "es": "Superficie regada (m²)"
+      },
+      "placeholder": {
+        "en": "e.g. 80",
+        "fr": "ex. 80",
+        "de": "z. B. 80",
+        "es": "p. ej. 80"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_3_reserve",
+      "type": "number",
+      "label": {
+        "en": "Soil reserve cap (mm)",
+        "fr": "Plafond de réserve du sol (mm)",
+        "de": "Obergrenze der Bodenreserve (mm)",
+        "es": "Límite de reserva del suelo (mm)"
+      },
+      "description": {
+        "en": "Surplus water the soil keeps after heavy rain, counted against the next days. 0: no carry-over.",
+        "fr": "Excédent d'eau que le sol garde après une forte pluie, déduit des jours suivants. 0 : aucun report.",
+        "de": "Überschüssiges Wasser, das der Boden nach starkem Regen speichert, für die nächsten Tage angerechnet. 0: kein Übertrag.",
+        "es": "Excedente de agua que el suelo guarda tras una lluvia fuerte, descontado de los días siguientes. 0: sin arrastre."
+      },
+      "required": false,
+      "default": 25,
+      "min": 0,
+      "max": 200
+    },
+    {
+      "key": "zone_4",
+      "type": "section",
+      "label": {
+        "en": "Zone 4",
+        "fr": "Zone 4",
+        "de": "Zone 4",
+        "es": "Zona 4"
+      }
+    },
+    {
+      "key": "zone_4_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "placeholder": {
+        "en": "e.g. Lawn",
+        "fr": "ex. Pelouse",
+        "de": "z. B. Rasen",
+        "es": "p. ej. Césped"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_4_crop",
+      "type": "select",
+      "label": {
+        "en": "Type of planting",
+        "fr": "Type de plantation",
+        "de": "Art der Bepflanzung",
+        "es": "Tipo de plantación"
+      },
+      "required": false,
+      "default": "lawn",
+      "options": [
+        {
+          "value": "lawn",
+          "label": {
+            "en": "Lawn (Kc 0.85)",
+            "fr": "Gazon (Kc 0,85)",
+            "de": "Rasen (Kc 0,85)",
+            "es": "Césped (Kc 0,85)"
+          }
+        },
+        {
+          "value": "vegetables",
+          "label": {
+            "en": "Vegetable garden (Kc 1)",
+            "fr": "Potager (Kc 1)",
+            "de": "Gemüsegarten (Kc 1)",
+            "es": "Huerto (Kc 1)"
+          }
+        },
+        {
+          "value": "flowers",
+          "label": {
+            "en": "Flower beds (Kc 0.75)",
+            "fr": "Massifs fleuris (Kc 0,75)",
+            "de": "Blumenbeete (Kc 0,75)",
+            "es": "Macizos de flores (Kc 0,75)"
+          }
+        },
+        {
+          "value": "shrubs",
+          "label": {
+            "en": "Hedges and shrubs (Kc 0.5)",
+            "fr": "Haies et arbustes (Kc 0,5)",
+            "de": "Hecken und Sträucher (Kc 0,5)",
+            "es": "Setos y arbustos (Kc 0,5)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "zone_4_kc",
+      "type": "string",
+      "label": {
+        "en": "Crop coefficient Kc (optional)",
+        "fr": "Coefficient cultural Kc (facultatif)",
+        "de": "Pflanzenkoeffizient Kc (optional)",
+        "es": "Coeficiente de cultivo Kc (opcional)"
+      },
+      "description": {
+        "en": "Replaces the coefficient of the type, from 0 to 2.",
+        "fr": "Remplace le coefficient du type, de 0 à 2.",
+        "de": "Ersetzt den Koeffizienten der Art, von 0 bis 2.",
+        "es": "Sustituye el coeficiente del tipo, de 0 a 2."
+      },
+      "placeholder": {
+        "en": "e.g. 0.7",
+        "fr": "ex. 0,7",
+        "de": "z. B. 0,7",
+        "es": "p. ej. 0,7"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_4_rate",
+      "type": "string",
+      "label": {
+        "en": "Application rate (mm/h)",
+        "fr": "Débit d'arrosage (mm/h)",
+        "de": "Beregnungsrate (mm/h)",
+        "es": "Tasa de riego (mm/h)"
+      },
+      "description": {
+        "en": "Water depth the sprinkler or drip line brings in one hour. Takes precedence over flow and area.",
+        "fr": "Hauteur d'eau apportée en une heure par l'arroseur ou le goutte-à-goutte. Prioritaire sur le débit et la surface.",
+        "de": "Wasserhöhe, die Regner oder Tropfschlauch in einer Stunde bringt. Hat Vorrang vor Durchfluss und Fläche.",
+        "es": "Altura de agua que aporta el aspersor o el goteo en una hora. Tiene prioridad sobre el caudal y la superficie."
+      },
+      "placeholder": {
+        "en": "e.g. 10",
+        "fr": "ex. 10",
+        "de": "z. B. 10",
+        "es": "p. ej. 10"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_4_flow",
+      "type": "string",
+      "label": {
+        "en": "Flow (L/min)",
+        "fr": "Débit (L/min)",
+        "de": "Durchfluss (L/min)",
+        "es": "Caudal (L/min)"
+      },
+      "placeholder": {
+        "en": "e.g. 12",
+        "fr": "ex. 12",
+        "de": "z. B. 12",
+        "es": "p. ej. 12"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_4_area",
+      "type": "string",
+      "label": {
+        "en": "Watered area (m²)",
+        "fr": "Surface arrosée (m²)",
+        "de": "Bewässerte Fläche (m²)",
+        "es": "Superficie regada (m²)"
+      },
+      "placeholder": {
+        "en": "e.g. 80",
+        "fr": "ex. 80",
+        "de": "z. B. 80",
+        "es": "p. ej. 80"
+      },
+      "required": false
+    },
+    {
+      "key": "zone_4_reserve",
+      "type": "number",
+      "label": {
+        "en": "Soil reserve cap (mm)",
+        "fr": "Plafond de réserve du sol (mm)",
+        "de": "Obergrenze der Bodenreserve (mm)",
+        "es": "Límite de reserva del suelo (mm)"
+      },
+      "description": {
+        "en": "Surplus water the soil keeps after heavy rain, counted against the next days. 0: no carry-over.",
+        "fr": "Excédent d'eau que le sol garde après une forte pluie, déduit des jours suivants. 0 : aucun report.",
+        "de": "Überschüssiges Wasser, das der Boden nach starkem Regen speichert, für die nächsten Tage angerechnet. 0: kein Übertrag.",
+        "es": "Excedente de agua que el suelo guarda tras una lluvia fuerte, descontado de los días siguientes. 0: sin arrastre."
+      },
+      "required": false,
+      "default": 25,
+      "min": 0,
+      "max": 200
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "preview",
+      "label": {
+        "en": "Show the advice now",
+        "fr": "Voir le conseil maintenant",
+        "de": "Empfehlung jetzt anzeigen",
+        "es": "Ver el consejo ahora"
+      },
+      "timeout_seconds": 40
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "watering_advised",
+      "label": {
+        "en": "Watering advised",
+        "fr": "Arrosage conseillé",
+        "de": "Bewässerung empfohlen",
+        "es": "Riego aconsejado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "Fires once a day, at the computation hour, for each zone that needs water. Use it to start the irrigation controller.",
+        "fr": "Part une fois par jour, à l'heure du calcul, pour chaque zone qui a besoin d'eau. Pour lancer le programmateur d'arrosage.",
+        "de": "Startet einmal am Tag zur Berechnungsstunde für jede Zone, die Wasser braucht. Damit startest du den Bewässerungscomputer.",
+        "es": "Se activa una vez al día, a la hora del cálculo, para cada zona que necesita agua. Para iniciar el programador de riego."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
+          "label": {
+            "en": "Zone",
+            "fr": "Zone",
+            "de": "Zone",
+            "es": "Zona"
+          }
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "zone",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Zone",
+            "fr": "Zone",
+            "de": "Zone",
+            "es": "Zona"
+          }
+        },
+        {
+          "key": "water_mm",
+          "type": "number",
+          "label": {
+            "en": "Water to bring (mm)",
+            "fr": "Eau à apporter (mm)",
+            "de": "Benötigte Wassermenge (mm)",
+            "es": "Agua a aportar (mm)"
+          }
+        },
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": {
+            "en": "Advised time (min, 0 if unknown)",
+            "fr": "Durée conseillée (min, 0 si inconnue)",
+            "de": "Empfohlene Dauer (Min., 0 wenn unbekannt)",
+            "es": "Duración aconsejada (min, 0 si desconocida)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "zone_watered",
+      "label": {
+        "en": "Zone watered",
+        "fr": "Zone arrosée",
+        "de": "Zone bewässert",
+        "es": "Zona regada"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Counts a watering in the balance: the amount given, or a full ration (back to 0) when left empty. Without a zone, every zone.",
+        "fr": "Compte un arrosage dans le bilan : la quantité donnée, ou une ration complète (retour à 0) si elle est vide. Sans zone, toutes les zones.",
+        "de": "Rechnet eine Bewässerung in die Bilanz ein: die angegebene Menge oder eine volle Gabe (zurück auf 0), wenn leer. Ohne Zone alle Zonen.",
+        "es": "Cuenta un riego en el balance: la cantidad indicada, o una ración completa (vuelta a 0) si está vacía. Sin zona, todas las zonas."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "label": {
+            "en": "Zone",
+            "fr": "Zone",
+            "de": "Zone",
+            "es": "Zona"
+          }
+        },
+        {
+          "key": "amount",
+          "type": "string",
+          "label": {
+            "en": "Water given (mm, optional)",
+            "fr": "Eau apportée (mm, facultatif)",
+            "de": "Gegebenes Wasser (mm, optional)",
+            "es": "Agua aportada (mm, opcional)"
+          },
+          "placeholder": {
+            "en": "empty: full ration",
+            "fr": "vide : ration complète",
+            "de": "leer: volle Gabe",
+            "es": "vacío: ración completa"
+          }
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "zones",
+          "type": "number",
+          "label": {
+            "en": "Zones updated",
+            "fr": "Zones mises à jour",
+            "de": "Aktualisierte Zonen",
+            "es": "Zonas actualizadas"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "irrigation",
+      "label": {
+        "en": "Irrigation advice",
+        "fr": "Arrosage conseillé",
+        "de": "Bewässerungsempfehlung",
+        "es": "Riego aconsejado"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Water and time to bring per zone, today's ET0 and rain, buttons to mark a zone watered.",
+        "fr": "Eau et durée à apporter par zone, ET0 et pluie du jour, boutons pour noter une zone arrosée.",
+        "de": "Wasser und Dauer pro Zone, ET0 und Regen von heute, Tasten zum Markieren einer Zone als bewässert.",
+        "es": "Agua y duración por zona, ET0 y lluvia de hoy, botones para marcar una zona como regada."
+      },
+      "icon": "droplet",
+      "action_timeout_seconds": 30,
+      "settings": [
+        {
+          "key": "show_weather",
+          "type": "boolean",
+          "label": {
+            "en": "Show today's ET0 and rain",
+            "fr": "Afficher l'ET0 et la pluie du jour",
+            "de": "ET0 und Regen von heute anzeigen",
+            "es": "Mostrar la ET0 y la lluvia de hoy"
+          },
+          "default": true
+        },
+        {
+          "key": "show_buttons",
+          "type": "boolean",
+          "label": {
+            "en": "Show the 'watered' buttons",
+            "fr": "Afficher les boutons « arrosé »",
+            "de": "Tasten „gegossen“ anzeigen",
+            "es": "Mostrar los botones «regada»"
+          },
+          "default": true
+        }
+      ]
     }
   ]
 }

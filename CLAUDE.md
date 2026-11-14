@@ -16,8 +16,8 @@ its only runtime dependency. It started from the official JavaScript template.
 ```bash
 npm install
 npm test                                  # node --test, the built-in runner
-node --test test/devices.test.js          # one file
-node --test --test-name-pattern "plug"    # tests whose name matches
+node --test test/balance.test.js          # one file
+node --test --test-name-pattern "rain"    # tests whose name matches
 npm run lint                              # ESLint
 npm run format:check                      # Prettier, as the CI runs it
 npm run format                            # Prettier, fix in place
@@ -31,15 +31,17 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+index.js                          SDK wiring only, then connect()
+src/app.js                        every SDK handler, the 5-minute loop, the trigger
+src/balance.js                    water balance, advice, local days (pure)
+src/openmeteo.js                  Open-Meteo client (daily ET0 and rain)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
+src/devices.js                    one device per zone, its states
+src/store.js                      /data/state.json: balances, last day counted
+src/widget.js                     dashboard widget "irrigation"
+src/i18n.js                       texts in en, fr, de, es
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (mandatory)
 test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
@@ -70,10 +72,26 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** is in English, French, German and Spanish: action
+  messages, manifest texts, and `docs/{en,fr,de,es}.md`, kept in sync.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
+
+## Arrosage conseillé
+
+- Source : Open-Meteo `/v1/forecast`, `daily=et0_fao_evapotranspiration,precipitation_sum`, `past_days=7`,
+  `forecast_days=2`, `timezone` = `TZ` de Gladys (les jours locaux d'Open-Meteo et du conteneur coïncident). Sans clé,
+  usage non commercial, moins de 10 000 appels par jour : une lecture toutes les 3 h, une nouvelle dès que le jour
+  local change, 15 min d'attente après un échec.
+- Bilan (modèle « bucket » de HAsmartirrigation) : `min(réserve, bilan + pluie − Kc × ET0)`, plancher −500 mm (bornes
+  de la fonctionnalité), arrondi au dixième chaque jour. Seule une série lue **le jour même** sert à compter la veille.
+- Le premier démarrage compte la veille tout de suite ; ensuite une fois par jour à `calc_hour`. Le déclencheur
+  `watering_advised` ne part que dans les 2 h qui suivent `calc_hour` (`adviceDay` en mémoire évite le doublon au
+  redémarrage) : un démarrage à 14 h ne lance pas l'arrosage.
+- Unités : `precipitation-sensor` n'accepte que mm/h et mm/jour (ET0 et pluie du jour, justes) ; les hauteurs d'eau
+  (bilan, eau à apporter) passent par `level-sensor/liquid-depth` en `mm`. Bilan signé : bornes ±500.
+- Sans débit configuré, la durée n'est pas publiée (plutôt qu'un 0 trompeur) et vaut 0 dans les variables du
+  déclencheur.
 
 ---
 

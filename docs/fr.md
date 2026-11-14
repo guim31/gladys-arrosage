@@ -1,67 +1,85 @@
-# Template de démonstration
+# Arrosage conseillé
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+La quantité d'eau dont chaque zone du jardin a besoin aujourd'hui, d'après le bilan hydrique du sol :
+l'évapotranspiration de référence (ET0, FAO-56) moins la pluie, à la position de votre maison. Les données viennent
+d'[Open-Meteo](https://open-meteo.com/), gratuit et sans compte. L'intégration conseille : elle ne commande aucune
+vanne, ce sont vos scènes qui lancent le programmateur d'arrosage.
 
 ## Ce que vous obtenez
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+Un appareil par zone, avec des capteurs en lecture seule :
+
+- **Eau à apporter** (mm) : le déficit du bilan, 0 quand le sol en a assez ou quand de la pluie est prévue ;
+- **Durée d'arrosage conseillée** (minutes) : l'eau à apporter divisée par le débit d'arrosage de la zone (seulement
+  si un débit en mm/h, ou un débit en L/min et une surface, sont configurés) ;
+- **Bilan hydrique du sol** (mm) : négatif = eau manquante, positif = eau gardée en réserve ;
+- **ET0 d'hier** et **ET0 du jour** (mm/jour), et la **Pluie prévue aujourd'hui** (mm/jour).
+
+## Comment le conseil est calculé
+
+Chaque jour à l'heure du calcul, la veille est ajoutée au bilan de chaque zone :
+
+`bilan = min(plafond de réserve, bilan de la veille + pluie − Kc × ET0)`
+
+- L'**ET0** est l'évapotranspiration de référence d'un gazon bien arrosé (FAO-56 Penman-Monteith), calculée par
+  Open-Meteo d'après la température, le vent, l'humidité et l'ensoleillement.
+- **Kc**, le coefficient cultural, l'adapte à la plantation : gazon 0,85, potager 1, massifs fleuris 0,75, haies et
+  arbustes 0,5, ou la valeur que vous saisissez.
+- Le **plafond de réserve** est l'excédent d'eau que le sol garde après une forte pluie ; il est consommé avant tout
+  conseil d'arrosage.
+- **Eau à apporter** = −bilan quand le bilan est négatif. Quand la pluie prévue dans la journée atteint le seuil, le
+  conseil est 0 (le déficit reste dans le bilan, et la pluie sera comptée le lendemain).
+- **Durée** = eau à apporter ÷ débit × 60. Le débit en mm/h est saisi, ou calculé d'après le débit en L/min et la
+  surface (1 L sur 1 m² = 1 mm).
+
+Le bilan est conservé dans `/data` au redémarrage. Après un arrêt, les jours manquants sont comptés au calcul suivant
+(jusqu'à 7 jours en arrière). Notez un arrosage avec l'action de scène « Zone arrosée » ou le bouton du widget : sans
+quantité, le bilan revient à 0 (ration complète).
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+Renseignez les coordonnées de votre maison dans Gladys (Paramètres → Maisons) : l'intégration les lit.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+- **Langue des noms et des textes** : les noms des fonctionnalités (figés à l'ajout de l'appareil) et les textes du
+  widget.
+- **Pluie qui annule l'arrosage** : en mm, décimales acceptées (2,5) ; 0 la désactive.
+- **Heure du calcul quotidien** (0-23, 5 par défaut) : choisissez-la avant l'heure d'arrosage.
+- **Zones 1 à 4** : une zone existe dès qu'elle a un nom. Puis son type de plantation (ou un Kc), son débit d'arrosage
+  en mm/h, ou son débit en L/min et sa surface arrosée en m², et son plafond de réserve en mm (25 par défaut, 0 pour
+  aucun report, par exemple des pots).
+
+Ordres de grandeur : arroseur oscillant 5 à 10 mm/h, tuyère escamotable 25 à 40 mm/h, goutte-à-goutte : débit des
+goutteurs × nombre ÷ surface.
 
 ## Actions
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+**Voir le conseil maintenant** lit Open-Meteo si besoin et affiche l'eau et la durée de chaque zone.
 
 ## Scènes
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
-
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+- Déclencheur **Arrosage conseillé** : une fois par jour, à l'heure du calcul, pour chaque zone qui a besoin d'eau
+  (filtre sur une zone ou non). Ses variables : zone, eau à apporter (mm), durée conseillée (minutes, 0 si inconnue).
+  Scène type : « Arrosage conseillé » sur la pelouse → ouvrir la vanne du programmateur (OpenSprinkler, Rain Bird, une
+  prise connectée…) → attendre la durée conseillée → la fermer → « Zone arrosée ».
+- Action **Zone arrosée** : compte un arrosage dans le bilan, la quantité donnée en mm ou une ration complète si elle
+  est vide. Sans zone, toutes les zones.
+- Les déclencheurs habituels de Gladys sur les valeurs de l'appareil marchent aussi, par exemple « Durée d'arrosage
+  conseillée supérieure à 0 » avec une condition horaire.
 
 ## Tableau de bord
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+Le widget **Arrosage conseillé** affiche l'ET0 et la pluie du jour, l'eau et la durée de chaque zone, et un bouton
+« arrosé » par zone. Ses réglages masquent la ligne météo ou les boutons. Les capteurs des appareils peuvent aussi être
+ajoutés au tableau de bord, avec leur historique.
 
-## Dépannage
+## Limites et dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- Une estimation, pas une mesure : le type de sol, la pente, l'ombre ou le vent ne sont pas connus. Ajustez le Kc ou
+  le plafond de réserve après quelques semaines si la pelouse jaunit (Kc plus haut) ou reste détrempée (Kc plus bas).
+- La pluie comptée est celle modélisée par Open-Meteo à vos coordonnées, pas celle de votre pluviomètre. Un orage
+  local peut être manqué.
+- Open-Meteo est gratuit pour un usage non commercial (moins de 10 000 requêtes par jour) : l'intégration le lit toutes
+  les 3 heures. Données sous licence CC BY 4.0, par Open-Meteo.com.
+- « Aucune position de maison » : renseignez les coordonnées de votre maison. « Open-Meteo est injoignable » : le
+  conseil garde les dernières prévisions et l'intégration réessaie toutes les 15 minutes.
+- Détails dans les journaux : réglez `LOG_LEVEL=debug`.
